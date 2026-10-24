@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(RepoRoot)build\SfmMod.props" />
+
+  <PropertyGroup>
+    <AssemblyName>RestraintTemplate</AssemblyName>
+    <RootNamespace>RestraintTemplate</RootNamespace>
+    <Version>0.1.0</Version>
+    <Description>RestraintTemplate - a minimal restraint on RestraintHub to copy (SecretFlasherManaka, BepInEx IL2CPP)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- RestraintHub: compile against it, do not copy its DLL (deploy / package put it in its own plugins folder).
+         Outside this repo: <Reference Include="RestraintHub"><HintPath>path\to\BepInEx\plugins\RestraintHub\RestraintHub.dll</HintPath><Private>false</Private></Reference> -->
+    <ProjectReference Include="..\RestraintHub\RestraintHub.csproj" Private="false" />
+  </ItemGroup>
+
+  <!-- SfmKit (LockMachine, GameUi) compiled into this DLL; its types are internal, so they do not clash with the hub's copy. -->
+  <Import Project="$(RepoRoot)build\SfmKit.props" />
+  <Import Project="$(RepoRoot)build\SfmMod.targets" />
+</Project>
