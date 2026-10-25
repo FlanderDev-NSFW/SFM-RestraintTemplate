@@ -25,7 +25,6 @@ namespace RestraintTemplate
         /// <summary>Live state for diagnostics.</summary>
         public static string Status = "off";
 
-        private IntPtr _gameData;
         private static int _failures;
 
         internal static void Fail(string where, Exception e)
@@ -50,7 +49,6 @@ namespace RestraintTemplate
         [HideFromIl2Cpp]
         private void Tick()
         {
-            TrackSaveIdentity();
             if (PlayerController.Instance == null || GameState.GameStateData == null) return; // title screen, loading
 
             // + / -: the hub hands out steps only while this restraint is the selected one.
@@ -112,16 +110,11 @@ namespace RestraintTemplate
         internal void OnSaveLoaded(bool locked, float chance)
         {
             Machine.Restore(locked, chance);
-            _gameData = GameState.GameStateData == null ? IntPtr.Zero : GameState.GameStateData.Pointer;
         }
 
         [HideFromIl2Cpp]
-        private void TrackSaveIdentity()
+        internal void OnNewGame()
         {
-            var data = GameState.GameStateData;
-            IntPtr ptr = data == null ? IntPtr.Zero : data.Pointer;
-            if (ptr == _gameData) return;
-            _gameData = ptr;
             if (Machine.Worn) Plugin.Logger.LogInfo("game data replaced without a load: off");
             Machine.Reset();
         }

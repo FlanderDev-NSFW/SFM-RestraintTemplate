@@ -17,14 +17,14 @@ namespace RestraintTemplate
     /// </list>
     /// </summary>
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
-    // Hard dependency: BepInEx loads the hub first and refuses to load this mod without it. Add a minimum version when you use
-    // newer hub API: [BepInDependency(Hub.Guid, "0.2.0")].
-    [BepInDependency(Hub.Guid, BepInDependency.DependencyFlags.HardDependency)]
+    // Hard dependency with a minimum version: BepInEx loads the hub first and refuses to load this mod without it or with an
+    // older one (0.3.0: OnSave / OnLoad / OnNewGame, OnTap, HeldStep, Hub.MenuOpen / InInteractArea).
+    [BepInDependency(Hub.Guid, "0.3.0")]
     public sealed class Plugin : BasePlugin
     {
         public const string PluginGuid = "com.local.restrainttemplate"; // yours: "com.<you>.<mod>"
         public const string PluginName = "RestraintTemplate";
-        public const string PluginVersion = "0.1.0";
+        public const string PluginVersion = "0.2.0";
 
         internal static ManualLogSource Logger;
         /// <summary>This restraint's registration; the controller reads <see cref="Restraint.StruggleHeld"/> and calls
@@ -46,7 +46,6 @@ namespace RestraintTemplate
             Tightness = Config.Bind("General", "Tightness", 5, new ConfigDescription(
                 "Example of a value + / - change while the restraint is selected (stored here).", new AcceptableValueRange<int>(1, 10)));
 
-            Patches.Apply(new HarmonyLib.Harmony(PluginGuid));
             ClassInjector.RegisterTypeInIl2Cpp<TemplateController>(); // injected types need a unique full name: rename the namespace
             AddComponent<TemplateController>();
 
@@ -56,6 +55,9 @@ namespace RestraintTemplate
                 RingValue = 9900,                    // unique among restraint mods - see the registry in mods/RestraintHub/README.md
                 Label = () => RingLabel.Value,
                 ShortcutSaveKey = "RestraintTemplate.Shortcuts", // never rename once released (players' number keys)
+                OnSave = Patches.Save,
+                OnLoad = Patches.Load,
+                OnNewGame = () => TemplateController.Instance?.OnNewGame(),
                 Holds = BodyParts.None,              // e.g. BodyParts.Neck for a collar: refused while something else holds the neck
                 IsWorn = () => TemplateController.Instance != null && TemplateController.Instance.Machine.Worn,
                 Blocks = () => RestraintHub.Blocks.Running,

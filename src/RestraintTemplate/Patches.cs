@@ -1,52 +1,44 @@
 using System;
 using ExposureUnnoticed2.Scripts.Base;
 using ExposureUnnoticed2.Scripts.InGame;
-using HarmonyLib;
+using RestraintHub;
 
 namespace RestraintTemplate
 {
     /// <summary>
     /// The restraint's own save data: whether it is on and the struggle chance, as two extra keys in the game's save slot
     /// (ignored by the game without the mod). The hub saves the number shortcuts (Restraint.ShortcutSaveKey); everything
-    /// else is yours. Every hook fails open.
+    /// else is yours. RestraintHub calls it and catches exceptions.
     /// </summary>
     internal static class Patches
     {
         public const string SaveKeyLocked = "RestraintTemplate.Locked"; // your mod's prefix; never rename once released
         public const string SaveKeyChance = "RestraintTemplate.Chance";
 
-        public static void Apply(Harmony harmony)
-        {
-            var me = typeof(Patches);
-            harmony.Patch(AccessTools.Method(typeof(SaveManager), nameof(SaveManager.Save)), postfix: new HarmonyMethod(me, nameof(SavePostfix)));
-            harmony.Patch(AccessTools.Method(typeof(SaveManager), nameof(SaveManager.Load)), postfix: new HarmonyMethod(me, nameof(LoadPostfix)));
-        }
-
-        // Written right after SaveManager.Save into the slot it just wrote (SaveRapper.currentDataPath); the system file (s.sd)
-        // is skipped. A hook on SaveRapper.AfterProcess never ran [observed 2026-10-11, SpreaderBar].
-        private static void SavePostfix()
+        // Called by RestraintHub (Restraint.OnSave / OnLoad) right after the game wrote / read a save slot (never the system file).
+        internal static void Save(SaveSlot slot)
         {
             try
             {
                 var c = TemplateController.Instance;
-                if (c == null || SaveRapper.IsSystemData || SaveRapper.currentDataPath == SaveRapper.SystemDataPath) return;
-                SaveRapper.Save(SaveKeyLocked, c.Machine.Worn);
-                SaveRapper.Save(SaveKeyChance, (double)c.Machine.Chance);
-                Plugin.Logger.LogInfo("[SFM-ACCEPT] save: locked=" + c.Machine.Worn + " path=" + SaveRapper.currentDataPath);
+                if (c == null) return;
+                slot.Save(SaveKeyLocked, c.Machine.Worn);
+                slot.Save(SaveKeyChance, (double)c.Machine.Chance);
+                Plugin.Logger.LogInfo("[SFM-ACCEPT] save: locked=" + c.Machine.Worn + " path=" + slot.Path);
             }
             catch (Exception e) { TemplateController.Fail("save hook", e); }
         }
 
-        private static void LoadPostfix()
+        internal static void Load(SaveSlot slot)
         {
             try
             {
                 var c = TemplateController.Instance;
-                if (c == null || SaveRapper.IsSystemData || SaveRapper.currentDataPath == SaveRapper.SystemDataPath) return;
-                bool locked = SaveRapper.Load(SaveKeyLocked, false); // default when the save has no key (older save)
-                double chance = SaveRapper.Load(SaveKeyChance, -1.0);
+                if (c == null) return;
+                bool locked = slot.Load(SaveKeyLocked, false); // default when the save has no key (older save)
+                double chance = slot.Load(SaveKeyChance, -1.0);
                 c.OnSaveLoaded(locked, (float)Math.Max(chance, 0.0));
-                Plugin.Logger.LogInfo("[SFM-ACCEPT] load: locked=" + locked + " path=" + SaveRapper.currentDataPath);
+                Plugin.Logger.LogInfo("[SFM-ACCEPT] load: locked=" + locked + " path=" + slot.Path);
             }
             catch (Exception e) { TemplateController.Fail("load hook", e); }
         }

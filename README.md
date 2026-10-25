@@ -7,7 +7,7 @@ every restraint needs and nothing else:
 |---|---|
 | `Plugin.cs` | config, the hard dependency on the hub, registering a `Restraint` (ring entry, list text, body parts, blocks, callbacks) |
 | `TemplateController.cs` | the lock and struggling free with SfmKit's `LockMachine` (F via `Entry.StruggleHeld`), a value changed with + / - (`Entry.TakeStep()`), putting it on (`OnChosen`), dropping it on a new game |
-| `Patches.cs` | saving its own state (on / off, struggle chance) in the game's save slot; the hub saves the number shortcuts |
+| `Patches.cs` | saving its own state (on / off, struggle chance) in the game's save slot - the hub calls it (`OnSave` / `OnLoad`); the hub saves the number shortcuts |
 
 In game it appears as **Template Restraint** on the restraint page of the ring, shows in the list over the head preview when
 on, takes away running, `+` / `-` change `General.Tightness` (1-10), holding **F** frees her. It is not deployed by default.
