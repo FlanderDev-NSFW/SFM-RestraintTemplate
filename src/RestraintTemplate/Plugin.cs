@@ -8,7 +8,7 @@ using RestraintHub;
 namespace RestraintTemplate
 {
     /// <summary>
-    /// A complete, minimal restraint built on RestraintHub - copy this mod to start your own (steps in README.md). It has no
+    /// A complete, minimal restraint built on RestraintHub - copy this mod to start your own (steps in docs/mods/RestraintTemplate.md). It has no
     /// model and poses nothing; it shows the parts every restraint needs:
     /// <list type="bullet">
     /// <item>registering with the hub (this file): ring entry, list, conflicts, input blocking, F and + / - routing;</item>
@@ -19,12 +19,12 @@ namespace RestraintTemplate
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     // Hard dependency with a minimum version: BepInEx loads the hub first and refuses to load this mod without it or with an
     // older one (0.3.0: OnSave / OnLoad / OnNewGame, OnTap, HeldStep, Hub.MenuOpen / InInteractArea).
-    [BepInDependency(Hub.Guid, "0.3.0")]
+    [BepInDependency(Hub.Guid, "1.0.0")]
     public sealed class Plugin : BasePlugin
     {
-        public const string PluginGuid = "com.local.restrainttemplate"; // yours: "com.<you>.<mod>"
+        public const string PluginGuid = "FlanderDev.SFM.RestraintTemplate"; // yours: "<You>.SFM.<Mod>"
         public const string PluginName = "RestraintTemplate";
-        public const string PluginVersion = "0.2.0";
+        public const string PluginVersion = "1.0.0";
 
         internal static ManualLogSource Logger;
         /// <summary>This restraint's registration; the controller reads <see cref="Restraint.StruggleHeld"/> and calls
@@ -52,7 +52,7 @@ namespace RestraintTemplate
             Entry = new Restraint
             {
                 Id = "RestraintTemplate",            // stable; orders the ring entries
-                RingValue = 9900,                    // unique among restraint mods - see the registry in mods/RestraintHub/README.md
+                RingValue = 9900,                    // unique among restraint mods - see the registry in docs/mods/RestraintHub.md
                 Label = () => RingLabel.Value,
                 ShortcutSaveKey = "RestraintTemplate.Shortcuts", // never rename once released (players' number keys)
                 OnSave = Patches.Save,

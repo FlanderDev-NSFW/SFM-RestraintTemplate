@@ -4,7 +4,7 @@
   <PropertyGroup>
     <AssemblyName>RestraintTemplate</AssemblyName>
     <RootNamespace>RestraintTemplate</RootNamespace>
-    <Version>0.2.0</Version>
+    <Version>1.0.0</Version>
     <Description>RestraintTemplate - a minimal restraint on RestraintHub to copy (SecretFlasherManaka, BepInEx IL2CPP)</Description>
   </PropertyGroup>
 
