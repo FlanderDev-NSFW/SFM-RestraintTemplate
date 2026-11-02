@@ -64,3 +64,4 @@ players to install RestraintHub (or include its folder in your zip).
   row "> Template Restraint (F, +/- tightness)" over the head preview (screenshot); `=` -> "tightness: 6"; a pose skill was not
   refused (it blocks only running); F held -> "release: off", list empty, key 1 kept its shortcut. Not checked in game: the
   save round trip (the same code as Yoke's, which is L3).
+- L3 1.1.0 (2026-11-02, RestraintHub 1.1.0): `PutOn` / `TakeOff` / `Settings` ("tightness", a mission's value not stored in the config) and the dependency range `"^1.1.0"` (the 1.0.0 build with `"1.0.0"` was refused by hub 1.1.0 - an exact match); put on, set to 7 (7.4 rounded) and removed by the test mission, config Tightness stayed 5.

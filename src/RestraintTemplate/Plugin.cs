@@ -18,13 +18,14 @@ namespace RestraintTemplate
     /// </summary>
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     // Hard dependency with a minimum version: BepInEx loads the hub first and refuses to load this mod without it or with an
-    // older one (0.3.0: OnSave / OnLoad / OnNewGame, OnTap, HeldStep, Hub.MenuOpen / InInteractArea).
-    [BepInDependency(Hub.Guid, "1.0.0")]
+    // older one (0.3.0: OnSave / OnLoad / OnNewGame, OnTap, HeldStep, Hub.MenuOpen / InInteractArea; 1.1.0: PutOn, TakeOff,
+    // Settings for missions).
+    [BepInDependency(Hub.Guid, "^1.1.0")]
     public sealed class Plugin : BasePlugin
     {
         public const string PluginGuid = "FlanderDev.SFM.RestraintTemplate"; // yours: "<You>.SFM.<Mod>"
         public const string PluginName = "RestraintTemplate";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = "1.1.0";
 
         internal static ManualLogSource Logger;
         /// <summary>This restraint's registration; the controller reads <see cref="Restraint.StruggleHeld"/> and calls
@@ -61,9 +62,21 @@ namespace RestraintTemplate
                 Holds = BodyParts.None,              // e.g. BodyParts.Neck for a collar: refused while something else holds the neck
                 IsWorn = () => TemplateController.Instance != null && TemplateController.Instance.Machine.Worn,
                 Blocks = () => RestraintHub.Blocks.Running,
-                OnChosen = () => { var c = TemplateController.Instance; if (c != null) c.PutOn(); },
+                OnChosen = () => { var c = TemplateController.Instance; if (c != null) c.OnRingChosen(); },
                 Attempt = () => TemplateController.Instance == null ? 0f : TemplateController.Instance.Machine.Attempt,
                 Controls = "+/- tightness",
+                // For Custom Missions v2 scripts (RtHub_Apply / RtHub_Remove / RtHub_Get / RtHub_Set) and the escape key:
+                PutOn = () => TemplateController.Instance == null ? "not ready" : TemplateController.Instance.PutOn(),
+                TakeOff = () => TemplateController.Instance?.TakeOff(),
+                Settings = new[]
+                {
+                    new RestraintSetting
+                    {
+                        Name = "tightness", Unit = "1-10",
+                        Get = () => TemplateController.Tightness,
+                        Set = TemplateController.SetTightness,
+                    },
+                },
             };
             Hub.Register(Entry);
             Logger.LogInfo("[SFM-ACCEPT] load: " + PluginName + " " + PluginVersion + " ready");

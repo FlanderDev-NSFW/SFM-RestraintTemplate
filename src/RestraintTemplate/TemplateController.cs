@@ -55,10 +55,11 @@ namespace RestraintTemplate
             int step = Plugin.Entry.TakeStep();
             if (step != 0 && Machine.State == LockState.Locked)
             {
-                int now = Plugin.Tightness.Value;
+                int now = Tightness;
                 int want = Math.Clamp(now + step, 1, 10);
                 if (want == now) Hub.Message(step > 0 ? "It is as tight as it goes." : "It is as loose as it goes.");
                 Plugin.Tightness.Value = want; // writes the config: only on the player's action
+                MissionTightness = 0;
                 Plugin.Logger.LogInfo("[SFM-ACCEPT] tightness: " + want);
             }
 
@@ -83,25 +84,59 @@ namespace RestraintTemplate
                     Plugin.Logger.LogInfo("[SFM-ACCEPT] release: off");
                     break;
             }
-            Status = Machine.State + ", attempt " + Machine.Attempt.ToString("0.00") + ", selected " + Plugin.Entry.Selected + ", tightness " + Plugin.Tightness.Value;
+            Status = Machine.State + ", attempt " + Machine.Attempt.ToString("0.00") + ", selected " + Plugin.Entry.Selected + ", tightness " + Tightness;
         }
 
         /// <summary>The hub calls this (Restraint.OnChosen) when the player chooses the entry while it is off and nothing worn holds
-        /// the same parts. Check whatever your restraint needs here and say why not with Hub.Message.</summary>
+        /// the same parts: put it on, or tell the player why not.</summary>
         [HideFromIl2Cpp]
-        internal void PutOn()
+        internal void OnRingChosen()
         {
-            if (!Machine.RequestLock()) return;
+            string why = PutOn();
+            if (why != null) Hub.Message("Can't use the " + Plugin.RingLabel.Value + ": " + why);
+        }
+
+        /// <summary>Put it on - for the ring entry, and for missions (Restraint.PutOn, RestraintHub 1.1.0): null when it is closing,
+        /// else why not in a few words. Check whatever your restraint needs here.</summary>
+        [HideFromIl2Cpp]
+        internal string PutOn()
+        {
+            if (!Machine.RequestLock()) return "it is already on";
             GameUi.PlaySe(InGameSoundManager.SeType.CommonEquip);
             Plugin.Logger.LogInfo("[SFM-ACCEPT] ring: put on, closing");
+            return null;
+        }
+
+        /// <summary>Take it off at once, without a struggle (Restraint.TakeOff: a mission, its timer, or the player's escape key).
+        /// Undo everything the restraint does to her here.</summary>
+        [HideFromIl2Cpp]
+        internal void TakeOff()
+        {
+            if (Machine.Worn) Plugin.Logger.LogInfo("[SFM-ACCEPT] release: taken off");
+            Machine.Reset();
+            MissionTightness = 0;
+        }
+
+        /// <summary>A tightness set by a mission (Restraint.Settings "tightness"), used instead of the config until + / - or the
+        /// restraint comes off; 0 = none. Missions never write the player's config.</summary>
+        internal static int MissionTightness;
+
+        internal static int Tightness => MissionTightness > 0 ? MissionTightness : Plugin.Tightness.Value;
+
+        /// <summary>Restraint.Settings "tightness": clamped to 1..10; null when done, else why not.</summary>
+        internal static string SetTightness(float value)
+        {
+            if (Instance == null || !Instance.Machine.Worn) return "it is not on";
+            MissionTightness = Math.Clamp((int)Math.Round(value), 1, 10);
+            Plugin.Logger.LogInfo("[SFM-ACCEPT] tightness: " + MissionTightness + " (mission)");
+            return null;
         }
 
         /// <summary>Diagnostics: put it on as the ring entry would (skips the hub's conflict check).</summary>
         public static string PutOnNow()
         {
             if (Instance == null) return "no controller";
-            Instance.PutOn();
-            return Instance.Machine.State.ToString();
+            return Instance.PutOn() ?? Instance.Machine.State.ToString();
         }
 
         // --- save identity: a load restores the lock (Patches); a new game or the title drops it -----------------------------
@@ -117,6 +152,7 @@ namespace RestraintTemplate
         {
             if (Machine.Worn) Plugin.Logger.LogInfo("game data replaced without a load: off");
             Machine.Reset();
+            MissionTightness = 0;
         }
 
         // --- where a real restraint does its visible work ----------------------------------------------------------------------

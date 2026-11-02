@@ -1,4 +1,4 @@
-# RestraintTemplate 1.0.0
+# RestraintTemplate 1.1.0
 
 For modders: a complete, minimal restraint built on **RestraintHub**, to copy when you write your own. It has no model and
 poses nothing. It shows what every restraint needs: registering a ring entry, putting it on, struggling free with `F`,
