@@ -37,7 +37,7 @@ on, takes away running, `+` / `-` change `General.Tightness` (1-10), holding **F
    (below). `./tools/dev.ps1 package <YourMod>` makes a zip with your mod and the hub.
 
 ## Test it (bridge)
-- Log: `[SFM-ACCEPT] register: <Id>` (hub), `ring: N restraint entries from index ...`.
+- Log: `[SFM-ACCEPT] register: <Id>` (hub), `ring: N entries from index ...`.
 - Put it on through the real ring: hold `1`, `X` to the restraint page, select it, **click** (releasing the ring key instead
   assigns it to that number key). Diagnostics: `game call RestraintTemplate.TemplateController PutOnNow`,
   `game get RestraintTemplate.TemplateController::Status`, `game get RestraintHub.HubController::Status`.
