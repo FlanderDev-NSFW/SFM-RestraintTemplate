@@ -7,7 +7,7 @@ namespace RestraintTemplate
 {
     /// <summary>
     /// The restraint's own save data: whether it is on and the struggle chance, as two extra keys in the game's save slot
-    /// (ignored by the game without the mod). The hub saves the number shortcuts (Restraint.ShortcutSaveKey); everything
+    /// (ignored by the game without the mod).; everything
     /// else is yours. RestraintHub calls it and catches exceptions.
     /// </summary>
     internal static class Patches
@@ -15,7 +15,7 @@ namespace RestraintTemplate
         public const string SaveKeyLocked = "RestraintTemplate.Locked"; // your mod's prefix; never rename once released
         public const string SaveKeyChance = "RestraintTemplate.Chance";
 
-        // Called by RestraintHub (Restraint.OnSave / OnLoad) right after the game wrote / read a save slot (never the system file).
+        // Called by RestraintHub (HubItem.OnSave / OnLoad) right after the game wrote / read a save slot (never the system file).
         internal static void Save(SaveSlot slot)
         {
             try

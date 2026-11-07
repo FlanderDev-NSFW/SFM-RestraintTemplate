@@ -12,11 +12,11 @@ every restraint needs and nothing else:
 
 | File | What it shows |
 |---|---|
-| `Plugin.cs` | config, the hard dependency on the hub, registering a `Restraint` (ring entry, list text, body parts, blocks, callbacks) |
+| `Plugin.cs` | config, the hard dependency on the hub, registering a `Wearable` (panel row, list text, body parts, blocks, callbacks) |
 | `TemplateController.cs` | the lock and struggling free with SfmKit's `LockMachine` (F via `Entry.StruggleHeld`), a value changed with + / - (`Entry.TakeStep()`), putting it on (`OnChosen`), dropping it on a new game |
-| `Patches.cs` | saving its own state (on / off, struggle chance) in the game's save slot - the hub calls it (`OnSave` / `OnLoad`); the hub saves the number shortcuts |
+| `Patches.cs` | saving its own state (on / off, struggle chance) in the game's save slot - the hub calls it (`OnSave` / `OnLoad`) |
 
-In game it appears as **Template Restraint** on the restraint page of the ring, shows in the list over the head preview when
+In game it appears as **Template Restraint** in the hub's panel (`U`, Wearables), shows in the list over the head preview when
 on, takes away running, `+` / `-` change `General.Tightness` (1-10), holding **F** frees her. It is not deployed by default.
 
 ## Make your own from it
@@ -24,10 +24,9 @@ on, takes away running, `+` / `-` change `General.Tightness` (1-10), holding **F
 1. Copy the folder: `mods/RestraintTemplate` -> `mods/<YourMod>`; rename `RestraintTemplate.csproj` to `<YourMod>.csproj` and
    set `AssemblyName` / `RootNamespace` in it. (Outside this repo see "Building outside this repo" below.)
 2. Rename the namespace `RestraintTemplate` in all files - injected MonoBehaviours need a unique full type name.
-3. In `Plugin.cs`: `PluginGuid` (`com.<you>.<mod>`), `PluginName`, the ring label, and in the `Restraint`:
-   - `Id` - stable, unique; the ring entries are ordered by it;
-   - `RingValue` - a free value from the registry in `docs/mods/RestraintHub.md` (9000-9998), and add yours there;
-   - `ShortcutSaveKey` and the keys in `Patches.cs` - your mod's prefix; never rename them after a release;
+3. In `Plugin.cs`: `PluginGuid` (`com.<you>.<mod>`), `PluginName`, the label, and in the `Wearable`:
+   - `Id` - stable, unique; the panel orders items by it;
+   - the keys in `Patches.cs` - your mod's prefix; never rename them after a release;
    - `Holds` - the body parts it holds (conflicts), `Blocks` - what she may not do while it is on, `Controls` - a few words
      for + / - (keep label + controls under ~30 characters; longer rows are shrunk to fit).
 4. Replace the tightness example with what + / - should do (or set `Controls = null` and ignore `TakeStep()`).
@@ -37,10 +36,8 @@ on, takes away running, `+` / `-` change `General.Tightness` (1-10), holding **F
    (below). `./tools/dev.ps1 package <YourMod>` makes a zip with your mod and the hub.
 
 ## Test it (bridge)
-- Log: `[SFM-ACCEPT] register: <Id>` (hub), `ring: N entries from index ...`.
-- Put it on through the real ring: hold `1`, `X` to the restraint page, select it, **click** (releasing the ring key instead
-  assigns it to that number key). Diagnostics: `game call RestraintTemplate.TemplateController PutOnNow`,
-  `game get RestraintTemplate.TemplateController::Status`, `game get RestraintHub.HubController::Status`.
+- Log: `[SFM-ACCEPT] register: <Id>` (hub), `put on: <Id>`.
+- Put it on through the panel: `key U`, then `game click "Template Restraint"`.
 - `key Equals --via input --expect "tightness:"`, `game keydown F` ... `wait-log "release: off"` ... `game keyup F`.
 - Negative controls: with another restraint selected (`key B --via input`), + / - and F must not reach yours.
 

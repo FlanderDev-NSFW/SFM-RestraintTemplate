@@ -87,16 +87,8 @@ namespace RestraintTemplate
             Status = Machine.State + ", attempt " + Machine.Attempt.ToString("0.00") + ", selected " + Plugin.Entry.Selected + ", tightness " + Tightness;
         }
 
-        /// <summary>The hub calls this (Restraint.OnChosen) when the player chooses the entry while it is off and nothing worn holds
-        /// the same parts: put it on, or tell the player why not.</summary>
-        [HideFromIl2Cpp]
-        internal void OnRingChosen()
-        {
-            string why = PutOn();
-            if (why != null) Hub.Message("Can't use the " + Plugin.RingLabel.Value + ": " + why);
-        }
 
-        /// <summary>Put it on - for the ring entry, and for missions (Restraint.PutOn, RestraintHub 1.1.0): null when it is closing,
+        /// <summary>Put it on - for the panel, and for missions (Wearable.PutOn, RestraintHub 1.1.0): null when it is closing,
         /// else why not in a few words. Check whatever your restraint needs here.</summary>
         [HideFromIl2Cpp]
         internal string PutOn()
@@ -107,7 +99,7 @@ namespace RestraintTemplate
             return null;
         }
 
-        /// <summary>Take it off at once, without a struggle (Restraint.TakeOff: a mission, its timer, or the player's escape key).
+        /// <summary>Take it off at once, without a struggle (Wearable.TakeOff: a mission, its timer, or the player's escape key).
         /// Undo everything the restraint does to her here.</summary>
         [HideFromIl2Cpp]
         internal void TakeOff()
@@ -117,13 +109,13 @@ namespace RestraintTemplate
             MissionTightness = 0;
         }
 
-        /// <summary>A tightness set by a mission (Restraint.Settings "tightness"), used instead of the config until + / - or the
+        /// <summary>A tightness set by a mission (Wearable.Settings "tightness"), used instead of the config until + / - or the
         /// restraint comes off; 0 = none. Missions never write the player's config.</summary>
         internal static int MissionTightness;
 
         internal static int Tightness => MissionTightness > 0 ? MissionTightness : Plugin.Tightness.Value;
 
-        /// <summary>Restraint.Settings "tightness": clamped to 1..10; null when done, else why not.</summary>
+        /// <summary>Wearable.Settings "tightness": clamped to 1..10; null when done, else why not.</summary>
         internal static string SetTightness(float value)
         {
             if (Instance == null || !Instance.Machine.Worn) return "it is not on";
@@ -132,7 +124,7 @@ namespace RestraintTemplate
             return null;
         }
 
-        /// <summary>Diagnostics: put it on as the ring entry would (skips the hub's conflict check).</summary>
+        /// <summary>Diagnostics: put it on as the panel would (skips the hub's conflict check).</summary>
         public static string PutOnNow()
         {
             if (Instance == null) return "no controller";
